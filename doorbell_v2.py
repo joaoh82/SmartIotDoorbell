@@ -6,26 +6,60 @@ import picamera
 import argparse 
 import signal 
 import sys 
+import glob
+import os
 import time 
 from datetime import datetime
 import logging 
 from rpi_rf import RFDevice 
+import telepot
+
 rfdevice = None 
 ### camera 
 camera = picamera.PiCamera() 
 camera.vflip=True 
 #
+
+def handle(msg):
+    chat_id = msg['chat']['id']
+    command = msg['text']
+    print('Got command %s' % command)
+
+    if command == '/news':
+        bot.sendMessage(chat_id, 'Here are some news...')
+    elif command == '/showmehome':
+        print('Taking photo') 
+        camera.capture('image.jpg') 
+        file_name = 'image_showmehome_' + str(datetime.now()) + '.jpg' 
+        camera.capture(file_name)  # time-stamped image 
+        with open('image.jpg', "rb") as imageFile: 
+            myFile = imageFile.read() 
+        bot.sendPhoto(chat_id, open('image.jpg', "rb"))
+        bot.sendMessage(chat_id, str(datetime.now()))
+        print(file_name + ' image saved and sent') 
+    elif command == '/lastdoorbell':
+        list_of_files = glob.glob('/var/www/html/images/image_doorbell_*')
+        latest_file = max(list_of_files, key=os.path.getctime)
+        bot.sendPhoto(chat_id, open(latest_file, "rb"))
+        bot.sendMessage(chat_id, latest_file)
+
+### telepot
+bot = telepot.Bot('XXX')
+bot.message_loop(handle)
+print('Telepot listening...')
+
 def post_image(): 
-   print('Taking photo') 
-   camera.capture('image.jpg') 
-   file_name = 'image_' + str(datetime.now()) + '.jpg' 
-   camera.capture(file_name)  # time-stamped image 
-   with open('image.jpg', "rb") as imageFile: 
-       myFile = imageFile.read() 
-       data = bytearray(myFile) 
+    # chat_id = response['message']['chat']['id']
+    print('Taking photo') 
+    camera.capture('image.jpg') 
+    file_name = 'image_doorbell_' + str(datetime.now()) + '.jpg' 
+    camera.capture(file_name)  # time-stamped image 
+    with open('image.jpg', "rb") as imageFile: 
+        myFile = imageFile.read() 
+    #    data = bytearray(myFile) 
 #    client.publish('dev/camera', data, mqttQos, mqttRetained)  # 
 #    client.publish('dev/test', 'Capture!') 
-   print(file_name + 'image published') 
+    print(file_name + ' image published') 
 
 ### MQTT 
 # broker = '192.168.0.100' 
