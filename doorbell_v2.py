@@ -1,4 +1,5 @@
-# combine the MQTT and RF receive codes 
+# Added code related to MQTT in case want to integrate it 
+# in the future, but for now only using RF
 import paho.mqtt.client as mqtt 
 import paho.mqtt.publish as publish 
 import picamera 
