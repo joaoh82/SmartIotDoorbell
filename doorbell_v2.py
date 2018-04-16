@@ -44,7 +44,7 @@ def handle(msg):
         bot.sendMessage(chat_id, latest_file)
 
 ### telepot
-bot = telepot.Bot('567975295:AAFWtNzLjOwveZM8YEDG0DAGUNfsY6Kfun0')
+bot = telepot.Bot('XXX')
 bot.message_loop(handle)
 print('Telepot listening...')
 
